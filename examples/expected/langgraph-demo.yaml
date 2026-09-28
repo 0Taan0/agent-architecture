@@ -1,0 +1,67 @@
+# Expected map for examples/langgraph-demo - acceptance criterion for the inspector (Schritt 0)
+version: '0.1'
+name: langgraph-demo
+agents:
+- id: agent_077b0f1
+  name: research
+  description: LangGraph node in app.graph.graph
+  tools: []
+  code_ref:
+    file: app/graph.py
+    symbol: research
+    line: 14
+  provenance: confirmed
+  source_adapter: langgraph
+- id: agent_8ed9b62
+  name: verify
+  description: LangGraph node in app.graph.graph
+  tools: []
+  code_ref:
+    file: app/graph.py
+    symbol: verify
+    line: 18
+  provenance: confirmed
+  source_adapter: langgraph
+schemas:
+- id: schema_613a82e
+  name: State
+  fields:
+  - name: question
+    type: str
+    optional: false
+  - name: answer
+    type: str
+    optional: false
+  - name: verified
+    type: bool
+    optional: false
+  code_ref:
+    file: app/graph.py
+    symbol: State
+    line: 8
+  provenance: confirmed
+  source_adapter: langgraph
+connections:
+- id: conn_271bc78
+  source: agent_8ed9b62
+  target: __end__
+  condition: done
+  provenance: confirmed
+  source_adapter: langgraph
+- id: conn_3af3092
+  source: __start__
+  target: agent_077b0f1
+  provenance: confirmed
+  source_adapter: langgraph
+- id: conn_c7346eb
+  source: agent_8ed9b62
+  target: agent_077b0f1
+  condition: conditional
+  provenance: confirmed
+  source_adapter: langgraph
+- id: conn_e55cd85
+  source: agent_077b0f1
+  target: agent_8ed9b62
+  provenance: confirmed
+  source_adapter: langgraph
+unresolved: []

@@ -1,0 +1,10 @@
+"""{{ agent.name }} - your implementation. This file is yours; the platform never edits it."""
+from __future__ import annotations
+
+from agents._generated.{{ agent.snake }}_base import {{ agent.pascal }}AgentBase
+
+
+class {{ agent.pascal }}Agent({{ agent.pascal }}AgentBase):
+    def run(self, task: {{ agent.input_type }}) -> {{ agent.output_type }}:
+        # TODO: call your model / tools here. self.record_llm(...) writes to the trace.
+        raise NotImplementedError("{{ agent.pascal }}Agent.run is not implemented yet")

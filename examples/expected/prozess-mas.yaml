@@ -1,0 +1,107 @@
+# Expected map for examples/prozess-mas - acceptance criterion for the inspector (Schritt 0)
+version: '0.1'
+name: prozess-mas
+agents:
+- id: agent_259cfac
+  name: CriticAgent
+  input_schema: schema_2945572
+  tools: []
+  code_ref:
+    file: agents/critic.py
+    symbol: CriticAgent
+    line: 9
+  provenance: declared
+  source_adapter: project_local
+- id: agent_5bb192f
+  name: ProcessAnalyzerAgent
+  input_schema: schema_25f79a1
+  output_schema: schema_88bb699
+  tools:
+  - process_mining
+  - bpmn_parser
+  code_ref:
+    file: agents/analyzer.py
+    symbol: ProcessAnalyzerAgent
+    line: 7
+  provenance: declared
+  source_adapter: project_local
+- id: agent_e97946f
+  name: ImprovementProposerAgent
+  input_schema: schema_88bb699
+  output_schema: schema_2945572
+  tools:
+  - knowledge_base
+  code_ref:
+    file: agents/proposer.py
+    symbol: ImprovementProposerAgent
+    line: 7
+  provenance: declared
+  source_adapter: project_local
+schemas:
+- id: schema_25f79a1
+  name: ProcessDescription
+  fields:
+  - name: name
+    type: str
+    optional: false
+  - name: steps
+    type: list[str]
+    optional: false
+  - name: owner
+    type: str | None
+    optional: true
+  code_ref:
+    file: core/schemas.py
+    symbol: ProcessDescription
+    line: 6
+  provenance: confirmed
+  source_adapter: project_local
+- id: schema_2945572
+  name: ImprovementProposal
+  fields:
+  - name: title
+    type: str
+    optional: false
+  - name: rationale
+    type: str
+    optional: false
+  - name: expected_gain
+    type: float | None
+    optional: true
+  code_ref:
+    file: core/schemas.py
+    symbol: ImprovementProposal
+    line: 17
+  provenance: confirmed
+  source_adapter: project_local
+- id: schema_88bb699
+  name: AnalysisResult
+  fields:
+  - name: bottlenecks
+    type: list[str]
+    optional: false
+  - name: confidence
+    type: float
+    optional: false
+  code_ref:
+    file: core/schemas.py
+    symbol: AnalysisResult
+    line: 12
+  provenance: confirmed
+  source_adapter: project_local
+connections:
+- id: conn_a8c9027
+  source: agent_e97946f
+  target: agent_259cfac
+  provenance: declared
+  source_adapter: project_local
+- id: conn_eacab82
+  source: agent_5bb192f
+  target: agent_e97946f
+  provenance: declared
+  source_adapter: project_local
+unresolved:
+- kind: dynamic_tool_registration
+  location: core/registry.py:11
+  message: tools registered at runtime are not visible statically
+  source_adapter: project_local

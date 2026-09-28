@@ -1,0 +1,73 @@
+# Expected map for examples/decorated - acceptance criterion for the inspector (Schritt 0)
+version: '0.1'
+name: decorated
+agents:
+- id: agent_2dcdbf2
+  name: writer
+  input_schema: schema_226293c
+  tools: []
+  code_ref:
+    file: agents/researcher.py
+    symbol: WriterAgent
+    line: 15
+  provenance: declared
+  source_adapter: declarations
+- id: agent_9ceacb1
+  name: researcher
+  model:
+    model: claude-sonnet-4-6
+  input_schema: schema_082fbb2
+  output_schema: schema_226293c
+  tools:
+  - web_search
+  code_ref:
+    file: agents/researcher.py
+    symbol: ResearcherAgent
+    line: 9
+  provenance: declared
+  source_adapter: declarations
+schemas:
+- id: schema_082fbb2
+  name: Query
+  fields:
+  - name: text
+    type: str
+    optional: false
+  code_ref:
+    file: models/schemas.py
+    symbol: Query
+    line: 5
+  provenance: confirmed
+  source_adapter: declarations
+- id: schema_226293c
+  name: ResearchResult
+  fields:
+  - name: title
+    type: str
+    optional: false
+  - name: sources
+    type: list[str]
+    optional: false
+  - name: summary
+    type: str
+    optional: false
+  - name: confidence
+    type: float
+    optional: false
+  code_ref:
+    file: models/schemas.py
+    symbol: ResearchResult
+    line: 10
+  provenance: confirmed
+  source_adapter: declarations
+connections:
+- id: conn_db2b14b
+  source: agent_9ceacb1
+  target: agent_2dcdbf2
+  provenance: declared
+  source_adapter: declarations
+unresolved:
+- kind: declaration_drift
+  location: agents/researcher.py:9
+  message: 'researcher: declared output ResearchResult, actual return dict[str, Any]'
+  source_adapter: declarations

@@ -1,0 +1,19 @@
+[importlinter]
+root_packages =
+    core
+    backend
+
+[importlinter:contract:layers]
+name = Layer order (backend on top, models at the bottom)
+type = layers
+layers =
+    backend
+    core.evaluation
+    core.impact
+    core.drift
+    core.runtime
+    core.generator
+    core.inspector
+    core.ownership
+    core.vcs
+    core.models
