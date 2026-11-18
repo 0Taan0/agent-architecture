@@ -8,8 +8,7 @@ name = Layer order (backend on top, models at the bottom)
 type = layers
 layers =
     backend
-    core.evaluation
-    core.impact
+    core.discovery
     core.drift
     core.runtime
     core.generator

@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -e ".[dev,langgraph]"
+      - run: pip install -e ".[dev]"
       - run: lint-imports
       - run: ruff check core backend tests
       - run: pytest -q

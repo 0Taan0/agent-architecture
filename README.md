@@ -18,14 +18,13 @@ and the code is shown — never silently fixed.
 | Canonical hashes, project manifest, ownership | `core/ownership` | done, tested |
 | Generator: Jinja2 templates, **plan → apply** (Proposal/Applier), git guard | `core/generator` | done, tested |
 | Drift: architecture vs code, declaration drift, generated-file hashes, severity table | `core/drift` | done, tested |
-| Impact: field-granular usages + past runs by `architecture_hash` | `core/impact` | done, tested |
 | Runner, run manifest (Spec 13.2), JSONL traces (OTel GenAI names), SQLite run store, replay client | `core/runtime`, `core/provenance` | done, tested |
 | FastAPI backend (thin, path-traversal guard) | `backend/` | done, tested |
 | React Flow read-only canvas, inspector panel, unresolved list, adapter status, drift view, CodeMirror | `frontend/` | done, builds |
-| LibCST migrations, evaluation harness, experiments | — | not started (Steps 11+) |
+| LibCST migrations, experiments | — | not started (Steps 11+) |
 
-Layer order is enforced by `import-linter` (`.importlinter`): `backend → evaluation →
-impact → drift → runtime → generator → inspector → ownership → vcs → models`.
+Layer order is enforced by `import-linter` (`.importlinter`): `backend → discovery →
+drift → runtime → generator → inspector → ownership → vcs → models`.
 
 ## Quick start
 

@@ -1,5 +1,4 @@
-"""Adapter protocol. All four mechanisms (declarations, project_local, conventions,
-langgraph) go through this one door."""
+"""Adapter protocol. Every inspection mechanism goes through this one door."""
 from __future__ import annotations
 
 from enum import Enum

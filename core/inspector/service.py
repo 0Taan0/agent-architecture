@@ -40,7 +40,7 @@ def inspect_project(project: ProjectContext, adapters: list[Adapter] | None = No
     for adapter, st in zip(adapters, statuses):
         if st.confidence == Confidence.NONE:
             continue
-        # conventions only run when nothing stronger claims the project, or on request
+        # weak adapters only run when nothing stronger claims the project, or on request
         if st.confidence == Confidence.WEAK and strong_found and not run_weak:
             continue
         result = adapter.extract(project)

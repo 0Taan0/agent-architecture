@@ -10,3 +10,5 @@ frontend/dist/
 .architecture/traces/
 .venv/
 .import_linter_cache/
+CLAUDE.md
+PROJECT.md

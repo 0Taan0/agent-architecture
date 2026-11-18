@@ -15,6 +15,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from core.inspector.calls import certain_calls
 from core.models import (
     AgentNode,
     CodeRef,
@@ -47,9 +48,25 @@ class ParsedModule:
             if isinstance(node, ast.Import):
                 for a in node.names:
                     self.imports[a.asname or a.name.split(".")[0]] = a.name
-            elif isinstance(node, ast.ImportFrom) and node.module:
+            elif isinstance(node, ast.ImportFrom):
+                base = self._import_base(node)
+                if base is None:
+                    continue
                 for a in node.names:
-                    self.imports[a.asname or a.name] = f"{node.module}.{a.name}"
+                    self.imports[a.asname or a.name] = f"{base}.{a.name}" if base else a.name
+
+    def _import_base(self, node: ast.ImportFrom) -> str | None:
+        """Absolute package an ImportFrom refers to; None if it points above the project root."""
+        if not node.level:
+            return node.module
+        parts = self.module.split(".") if self.module else []
+        if not self.rel.endswith("__init__.py"):
+            parts = parts[:-1]          # a plain module lives in its parent package
+        up = node.level - 1
+        if up > len(parts):
+            return None
+        parts = parts[:len(parts) - up]
+        return ".".join(parts + ([node.module] if node.module else []))
 
     def resolve(self, expr: ast.expr) -> str:
         """Best-effort dotted name for an expression like `Base`, `core.base.Base`."""
@@ -114,6 +131,7 @@ class CallInfo:
     line: int
     node: ast.Call
     module: ParsedModule
+    callee: str = ""     # set for calls that come from `certain_calls`
 
     def arg_str(self, index: int) -> str | None:
         if index < len(self.node.args):
@@ -269,6 +287,18 @@ class InspectContext:
                     if callee == dotted or callee.endswith("." + dotted):
                         out.append(CallInfo(file=m.rel, line=n.lineno, node=n, module=m))
         return out
+
+    @cached_property
+    def certain_calls(self) -> list[CallInfo]:
+        """Call sites whose callee is known for certain (see calls.py), in file and line order."""
+        out = [CallInfo(file=m.rel, line=n.lineno, node=n, module=m, callee=callee)
+               for m in self.modules for callee, n in certain_calls(m)]
+        return sorted(out, key=lambda c: (c.file, c.line, c.callee))
+
+    def calls_matching(self, callee: str) -> list[CallInfo]:
+        """Certain calls of `callee`: the full dotted name, or a suffix of it at a dot."""
+        return [c for c in self.certain_calls
+                if c.callee == callee or c.callee.endswith("." + callee)]
 
     def function_def(self, module: ParsedModule, name: str) -> ast.FunctionDef | None:
         for n in ast.walk(module.tree):

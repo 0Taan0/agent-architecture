@@ -1,0 +1,31 @@
+# Mapping rules for this project, applied by agent-architect without any LLM.
+# Written by hand as the reference for the rule language; `discover` proposes such a file.
+version: 1
+agents:
+- id: agents
+  status: accepted
+  evidence:
+  - core/base.py:6
+  rationale: Every agent subclasses BaseAgent and implements run(task).
+  inherits: core.base.BaseAgent
+  input_schema:
+    param_of: run
+  output_schema:
+    returns_of: run
+  tools:
+    attr: TOOLS
+connections:
+- id: pipeline
+  status: accepted
+  evidence:
+  - pipeline.py:5
+  rationale: PIPELINE lists the agents in the order they run.
+  sequence: pipeline.PIPELINE
+unresolved:
+- id: dynamic-tools
+  status: accepted
+  evidence:
+  - core/registry.py:11
+  calls: core.registry.register
+  kind: dynamic_tool_registration
+  message: tools registered at runtime are not visible statically

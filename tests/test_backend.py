@@ -31,8 +31,25 @@ def test_register_inspect_file_and_traversal_guard(client, prozess_mas):
     assert client.get(f"/api/projects/{pid}/file", params={"path": "/etc/passwd"}).status_code == 403
 
     adapters = client.get(f"/api/projects/{pid}/adapters").json()
-    assert {a["name"] for a in adapters} == {"declarations", "project_local", "langgraph", "conventions"}
+    assert {a["name"] for a in adapters} == {"declarations", "project_local", "rules"}
 
     drift = client.get(f"/api/projects/{pid}/drift").json()     # no architecture.yaml -> import view
     assert any(i["kind"] == "agent_added_in_code" for i in drift["items"])
     assert client.post(f"/api/projects/{pid}/generate/plan").status_code == 400
+
+
+def test_review_endpoints(client, prozess_mas, tmp_path):
+    import shutil
+    root = tmp_path / "project"
+    shutil.copytree(prozess_mas.root, root)
+    pid = client.post("/api/projects", json={"path": str(root)}).json()["id"]
+
+    state = client.get(f"/api/projects/{pid}/mapping").json()
+    assert state["exists"] and [r["id"] for r in state["rules"]] == ["agents", "pipeline", "dynamic-tools"]
+    assert len(state["rules"][0]["element_ids"]) == 3
+
+    r = client.post(f"/api/projects/{pid}/mapping/status", json={"rule_ids": ["pipeline"], "status": "rejected"})
+    assert r.status_code == 200 and r.json()["rules"][1]["status"] == "rejected"
+    assert "status: rejected" in (root / ".architecture/mapping.yaml").read_text()
+    assert client.post(f"/api/projects/{pid}/mapping/status",
+                       json={"rule_ids": ["nope"], "status": "accepted"}).status_code == 409

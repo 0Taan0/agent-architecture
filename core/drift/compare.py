@@ -9,8 +9,6 @@ The code is the truth about what IS; the architecture is the truth about what is
 """
 from __future__ import annotations
 
-from pathlib import Path
-
 from pydantic import BaseModel, Field
 
 from core.models import ArchitectureModel, ProjectContext
@@ -172,4 +170,4 @@ def detect_drift(project: ProjectContext, stored: ArchitectureModel | None,
     return report
 
 
-__all__ = ["DriftItem", "DriftReport", "Path", "compare", "detect_drift", "file_drift"]
+__all__ = ["DriftItem", "DriftReport", "compare", "detect_drift", "file_drift"]

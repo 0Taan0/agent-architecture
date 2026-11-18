@@ -1,9 +1,8 @@
-from .conventions import ConventionsAdapter
+from core.inspector.rules import RulesAdapter
+
 from .declarations import DeclarationsAdapter
-from .langgraph import LangGraphAdapter
 from .project_local import ProjectLocalAdapter
 
-ALL_ADAPTERS = [DeclarationsAdapter, ProjectLocalAdapter, LangGraphAdapter, ConventionsAdapter]
+ALL_ADAPTERS = [DeclarationsAdapter, ProjectLocalAdapter, RulesAdapter]
 
-__all__ = ["ALL_ADAPTERS", "ConventionsAdapter", "DeclarationsAdapter", "LangGraphAdapter",
-           "ProjectLocalAdapter"]
+__all__ = ["ALL_ADAPTERS", "DeclarationsAdapter", "ProjectLocalAdapter", "RulesAdapter"]

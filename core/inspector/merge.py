@@ -3,8 +3,7 @@
 Fixed priority: confirmed > declared > inferred > unknown.
 Contradictions are NOT resolved silently - they are reported as `adapter_conflict`
 unresolved items (Declaration Drift feeds on this in core.drift).
-Matching: by stable id first, then by name (the LangGraph node name vs the class name a
-project_local adapter reports).
+Matching: by stable id first, then by name.
 """
 from __future__ import annotations
 
@@ -67,9 +66,11 @@ def merge(name: str, inputs: list[MergeInput]) -> ArchitectureModel:
                     PROVENANCE_RANK[cand.provenance] > PROVENANCE_RANK[connections[cid].provenance]:
                 connections[cid] = cand
 
+    # The same finding reported by two adapters is shown once
+    distinct = {(u.kind, u.location, u.message): u for u in reversed(unresolved + conflicts)}
     return ArchitectureModel(name=name, agents=list(agents.values()), schemas=list(schemas.values()),
                              connections=list(connections.values()),
-                             unresolved=unresolved + conflicts).sorted()
+                             unresolved=list(distinct.values())).sorted()
 
 
 def _max_rank(r: ExtractionResult) -> int:

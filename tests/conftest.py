@@ -19,8 +19,3 @@ def prozess_mas() -> ProjectContext:
 @pytest.fixture
 def decorated() -> ProjectContext:
     return ProjectContext.open(EXAMPLES / "decorated")
-
-
-@pytest.fixture
-def langgraph_demo() -> ProjectContext:
-    return ProjectContext.open(EXAMPLES / "langgraph-demo")

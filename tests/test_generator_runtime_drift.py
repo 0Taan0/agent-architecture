@@ -1,10 +1,9 @@
-"""Slice 1 + 2 end to end: design -> generate -> run -> trace -> drift -> impact -> replay."""
+"""Slice 1 + 2 end to end: design -> generate -> run -> trace -> drift -> replay."""
 import json
 import subprocess
 
 from core.drift import Severity, compare, detect_drift
 from core.generator import OperationKind, apply_plan, plan_generation
-from core.impact import impact_of_schema
 from core.inspector import inspect_project
 from core.inspector.adapters import DeclarationsAdapter
 from core.models import (
@@ -123,14 +122,6 @@ def test_full_circle(tmp_path):
     plan3 = plan_generation(project, changed, load_manifest(project.root))
     conflict = next(op for op in plan3.operations if op.path.endswith("researcher_base.py"))
     assert conflict.kind == OperationKind.CONFLICT and "hand" not in (conflict.new_content or "")
-
-    # --- impact: field granular + past runs under the old hash
-    imp = impact_of_schema(project, model, "schema_r", fields=["confidence"],
-                           previous_architecture_hash=plan.architecture_hash)
-    assert imp.direct_agents == ["Researcher", "Writer"]
-    assert any(u.kind == "subscript" and u.file == "agents/writer.py"
-               for u in imp.field_usages["confidence"])
-    assert imp.affected_runs == 1 and imp.affected_run_ids == [run.run_id]
 
 
 def test_apply_refuses_dirty_tree(tmp_path):

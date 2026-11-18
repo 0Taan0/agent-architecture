@@ -6,12 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from backend.registry import ProjectRegistry
+from core.discovery.review import ReviewState, decide, review
 from core.drift import DriftReport, detect_drift
 from core.generator import ApplyResult, Plan, apply_plan, plan_generation
-from core.impact import ImpactReport, impact_of_schema
 from core.inspector import InspectionReport, inspect_project
 from core.inspector.adapters import ALL_ADAPTERS
 from core.inspector.adapters.project_local import INSPECT_FILE, SCAFFOLD
+from core.inspector.rules import Status
 from core.models import (
     ArchitectureModel,
     LayoutModel,
@@ -65,6 +66,11 @@ class FileResponse(BaseModel):
 
 class ApplyRequest(BaseModel):
     allow_dirty: bool = False
+
+
+class DecisionRequest(BaseModel):
+    rule_ids: list[str]
+    status: Status
 
 
 class RunRequest(BaseModel):
@@ -136,6 +142,21 @@ def get_file(path: str = Query(...), project: ProjectContext = Depends(project_c
                                                                             errors="replace"))
 
 
+@router.get("/projects/{project_id}/mapping", response_model=ReviewState)
+def get_mapping(project: ProjectContext = Depends(project_ctx)) -> ReviewState:
+    """The mapping rules with what each one yields and what is wrong with it."""
+    return review(project)
+
+
+@router.post("/projects/{project_id}/mapping/status", response_model=ReviewState)
+def decide_rules(body: DecisionRequest, project: ProjectContext = Depends(project_ctx)) -> ReviewState:
+    """Accept or reject rules. Only writes the `status` of those rules to mapping.yaml."""
+    try:
+        return decide(project, body.rule_ids, body.status)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
 @router.get("/projects/{project_id}/drift", response_model=DriftReport)
 def drift(project: ProjectContext = Depends(project_ctx)) -> DriftReport:
     current = inspect_project(project).model
@@ -180,15 +201,3 @@ def get_run(run_id: str, project: ProjectContext = Depends(project_ctx)) -> dict
         raise HTTPException(404, "unknown run")
     events = read_trace(project.abs(run["trace_path"])) if run.get("trace_path") else []
     return {**run, "summary": summarize_trace(events), "events": [e.model_dump() for e in events]}
-
-
-@router.get("/projects/{project_id}/impact", response_model=ImpactReport)
-def impact(schema_id: str, fields: str | None = None, previous_hash: str | None = None,
-           project: ProjectContext = Depends(project_ctx)) -> ImpactReport:
-    model = load_architecture(project.root) or inspect_project(project).model
-    try:
-        return impact_of_schema(project, model, schema_id,
-                                fields=[f for f in (fields or "").split(",") if f] or None,
-                                previous_architecture_hash=previous_hash)
-    except KeyError as exc:
-        raise HTTPException(404, f"unknown schema {exc}") from exc

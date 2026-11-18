@@ -10,12 +10,6 @@ class Severity(str, Enum):
     COSMETIC = "cosmetic"
 
 
-class Resolution(str, Enum):
-    ADOPT = "adopt"      # architecture follows the code
-    ENFORCE = "enforce"  # change proposal for the code
-    ACCEPT = "accept"    # keep the deviation, documented
-
-
 SEVERITY: dict[str, Severity] = {
     "agent_removed_in_code": Severity.BREAKING,
     "agent_added_in_code": Severity.STRUCTURAL,
